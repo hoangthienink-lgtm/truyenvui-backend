@@ -30,6 +30,11 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Root Route
+app.get('/', (req, res) => {
+  res.send('TruyenVui API is running successfully!');
+});
+
 // Routes
 const authRoutes = require('./src/routes/authRoutes');
 const userRoutes = require('./src/routes/userRoutes');
