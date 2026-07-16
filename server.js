@@ -31,12 +31,16 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
+const authRoutes = require('./src/routes/authRoutes');
+const userRoutes = require('./src/routes/userRoutes');
 const comicRoutes = require('./src/routes/comicRoutes');
 const chapterRoutes = require('./src/routes/chapterRoutes');
 const genreRoutes = require('./src/routes/genreRoutes');
 const crawlRoutes = require('./src/routes/crawlRoutes');
 const ttsRoutes = require('./src/routes/ttsRoutes');
 
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/comics', comicRoutes);
 app.use('/api/chapters', chapterRoutes);
 app.use('/api/genres', genreRoutes);
@@ -53,6 +57,9 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 });
 
 // Start Server - bind to 0.0.0.0 for LAN access
-app.listen(port, '0.0.0.0', () => {
+const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Backend server running on http://localhost:${port}`);
 });
+
+// Hack to keep event loop alive for Node 22 + Express 5
+setInterval(() => {}, 1000 * 60 * 60);

@@ -34,7 +34,28 @@ db.exec(`
     name TEXT UNIQUE NOT NULL,
     slug TEXT UNIQUE NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT DEFAULT 'user',
+    is_approved INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
+
+// Migration: add is_approved column if it doesn't exist
+try {
+  const tableInfo = db.prepare("PRAGMA table_info(users)").all();
+  const hasIsApproved = tableInfo.some(col => col.name === 'is_approved');
+  if (!hasIsApproved) {
+    db.exec('ALTER TABLE users ADD COLUMN is_approved INTEGER DEFAULT 1');
+    console.log('Migration: added is_approved column to users table.');
+  }
+} catch (err) {
+  console.error('Migration error:', err);
+}
 
 // Normalize database to NFC on startup
 try {
