@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const multer = require('multer');
+const compression = require('compression');
 
 // Setup server
 const app = express();
@@ -27,6 +28,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Middlewares
+app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

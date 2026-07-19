@@ -86,7 +86,13 @@ exports.updateComic = (req, res) => {
       WHERE id = ?
     `);
     
-    const info = updateStmt.run(title, description, author, coverImageUrl, id);
+    const info = updateStmt.run(
+      title ? title.normalize('NFC') : null, 
+      description ? description.normalize('NFC') : null, 
+      author ? author.normalize('NFC') : null, 
+      coverImageUrl, 
+      id
+    );
     if (info.changes === 0) {
       return res.status(404).json({ error: 'Truyện không tồn tại.' });
     }

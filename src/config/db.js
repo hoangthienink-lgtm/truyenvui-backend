@@ -43,6 +43,10 @@ db.exec(`
     is_approved INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE INDEX IF NOT EXISTS idx_chapters_comicId_chapterNumber ON chapters(comicId, chapterNumber);
+  CREATE INDEX IF NOT EXISTS idx_comics_slug ON comics(slug);
+  CREATE INDEX IF NOT EXISTS idx_comics_views ON comics(views DESC);
 `);
 
 // Migration: add is_approved column if it doesn't exist
@@ -57,30 +61,7 @@ try {
   console.error('Migration error:', err);
 }
 
-// Normalize database to NFC on startup
-try {
-  const comics = db.prepare('SELECT * FROM comics').all();
-  for (const c of comics) {
-    db.prepare('UPDATE comics SET title = ?, description = ?, author = ?, status = ?, genreIds = ? WHERE id = ?')
-      .run(
-        (c.title || '').normalize('NFC'),
-        (c.description || '').normalize('NFC'),
-        (c.author || '').normalize('NFC'),
-        (c.status || '').normalize('NFC'),
-        (c.genreIds || '').normalize('NFC'),
-        c.id
-      );
-  }
-  const chapters = db.prepare('SELECT * FROM chapters').all();
-  for (const ch of chapters) {
-    db.prepare('UPDATE chapters SET title = ?, content = ? WHERE id = ?')
-      .run((ch.title || '').normalize('NFC'), (ch.content || '').normalize('NFC'), ch.id);
-  }
-  console.log('Database NFC normalization completed.');
-} catch (err) {
-  console.error('Error during DB NFC normalization:', err);
-}
-
+// Database normalization at startup removed for performance reasons
 // Seed data if empty
 const hasComics = db.prepare('SELECT COUNT(*) as count FROM comics').get();
 if (hasComics.count === 0) {
