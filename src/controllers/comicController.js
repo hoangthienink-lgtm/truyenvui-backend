@@ -2,7 +2,29 @@ const db = require('../config/db');
 
 exports.getAllComics = (req, res) => {
   try {
-    const comics = db.prepare('SELECT * FROM comics ORDER BY id DESC').all();
+    const { limit, sortBy, order, ids } = req.query;
+    let query = 'SELECT id, title, slug, coverImageUrl, status, views, genreIds FROM comics';
+    const params = [];
+    
+    if (ids) {
+       const idArray = ids.split(',');
+       const placeholders = idArray.map(() => '?').join(',');
+       query += ` WHERE id IN (${placeholders})`;
+       params.push(...idArray);
+    }
+
+    if (sortBy === 'views') {
+      query += ` ORDER BY views ${order === 'asc' ? 'ASC' : 'DESC'}`;
+    } else {
+      query += ` ORDER BY id ${order === 'asc' ? 'ASC' : 'DESC'}`;
+    }
+
+    if (limit) {
+      query += ' LIMIT ?';
+      params.push(parseInt(limit));
+    }
+
+    const comics = db.prepare(query).all(...params);
     const mapped = comics.map(c => ({...c, genreIds: JSON.parse(c.genreIds || '[]')}));
     res.json({ total: mapped.length, documents: mapped });
   } catch (err) {
