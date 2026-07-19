@@ -6,6 +6,7 @@ const { verifyToken, requireAdmin } = require('../middleware/authMiddleware');
 router.get('/', comicController.getAllComics);
 router.get('/:slug', comicController.getComicBySlug);
 router.post('/:id/views', comicController.incrementComicViews);
+router.put('/:id', verifyToken, requireAdmin, comicController.updateComic);
 router.delete('/:id', verifyToken, requireAdmin, comicController.deleteComic);
 
 module.exports = router;

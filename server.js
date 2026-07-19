@@ -1,6 +1,7 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 
@@ -43,6 +44,8 @@ const chapterRoutes = require('./src/routes/chapterRoutes');
 const genreRoutes = require('./src/routes/genreRoutes');
 const crawlRoutes = require('./src/routes/crawlRoutes');
 const ttsRoutes = require('./src/routes/ttsRoutes');
+const uploadRoutes = require('./src/routes/uploadRoutes');
+const aiRoutes = require('./src/routes/aiRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -51,6 +54,8 @@ app.use('/api/chapters', chapterRoutes);
 app.use('/api/genres', genreRoutes);
 app.use('/api/crawl', crawlRoutes);
 app.use('/api/tts', ttsRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Legacy File upload endpoint (kept for backward compatibility)
 app.post('/api/upload', upload.single('file'), (req, res) => {
