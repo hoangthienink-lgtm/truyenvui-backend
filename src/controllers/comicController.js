@@ -38,7 +38,22 @@ exports.getComicBySlug = (req, res) => {
     if (!comic) return res.status(404).json({ error: 'Comic not found' });
     
     comic.genreIds = JSON.parse(comic.genreIds || '[]');
-    res.json(comic);
+    
+    // Fetch chapters for this comic without full content for fast load
+    const chapters = db.prepare('SELECT id, comicId, chapterNumber, title, slug FROM chapters WHERE comicId = ? ORDER BY chapterNumber ASC').all(comic.id);
+    
+    // Fetch genres for this comic
+    let genres = [];
+    if (comic.genreIds && comic.genreIds.length > 0) {
+      const placeholders = comic.genreIds.map(() => '?').join(',');
+      genres = db.prepare(`SELECT * FROM genres WHERE id IN (${placeholders})`).all(...comic.genreIds);
+    }
+    
+    res.json({
+      ...comic,
+      chapters: chapters.map(c => ({ ...c, $id: c.id })),
+      genres: genres.map(g => ({ ...g, $id: g.id }))
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
